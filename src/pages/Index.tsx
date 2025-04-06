@@ -8,6 +8,7 @@ import GroupCard from '@/components/GroupCard';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/utils/format';
 import { sampleUsers, sampleGroups, sampleExpenses } from '@/utils/sample-data';
+import { useAuthStore } from '@/store/useAuthStore';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -18,9 +19,16 @@ const Index = () => {
     getOverallBalance 
   } = useStore();
   
-  // Initialize with sample data if empty
+  const authUser = useAuthStore(state => state.user);
+  
+  // Initialize with user data from auth store or sample data if needed
   useEffect(() => {
-    if (!currentUser) {
+    // If we have an authenticated user but no current user in the main store
+    if (authUser && !currentUser) {
+      setCurrentUser(authUser);
+    } 
+    // If no authenticated user and no current user, use sample data
+    else if (!authUser && !currentUser) {
       setCurrentUser(sampleUsers[0]);
       
       // Initialize store with sample data if no groups exist
@@ -51,7 +59,7 @@ const Index = () => {
         });
       }
     }
-  }, [currentUser, groups.length, setCurrentUser]);
+  }, [authUser, currentUser, groups.length, setCurrentUser]);
   
   // Get overall balance for the current user
   const overallBalance = useStore(
@@ -75,11 +83,11 @@ const Index = () => {
     >
       {currentUser && (
         <div className="mb-6">
-          <div className={`p-4 rounded-lg mb-2 ${
+          <div className={`p-6 rounded-lg mb-4 ${
             overallBalance > 0 
-              ? 'bg-destructive/10 text-destructive' 
+              ? 'bg-destructive/10 text-destructive border border-destructive/20' 
               : overallBalance < 0 
-                ? 'bg-accent/10 text-accent' 
+                ? 'bg-secondary/10 text-secondary border border-secondary/20' 
                 : 'bg-muted text-muted-foreground'
           }`}>
             <h2 className="text-lg font-medium">Your Balance</h2>
@@ -95,14 +103,20 @@ const Index = () => {
       )}
       
       {groups.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-64">
-          <p className="text-center text-muted-foreground mb-4">
-            You don't have any groups yet. Create your first group to get started.
-          </p>
-          <Button onClick={createGroup}>
-            <Plus className="mr-2 h-4 w-4" />
-            Create Group
-          </Button>
+        <div className="flex flex-col items-center justify-center h-64 bg-card rounded-lg border p-8">
+          <div className="text-center space-y-4">
+            <div className="p-3 bg-primary/10 rounded-full inline-block">
+              <Plus className="h-6 w-6 text-primary" />
+            </div>
+            <h3 className="text-xl font-medium">No Groups Yet</h3>
+            <p className="text-muted-foreground">
+              You don't have any groups yet. Create your first group to start tracking expenses.
+            </p>
+            <Button onClick={createGroup} size="lg" className="mt-2">
+              <Plus className="mr-2 h-4 w-4" />
+              Create Group
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="space-y-4">
