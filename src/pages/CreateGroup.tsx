@@ -25,7 +25,7 @@ const CreateGroup = () => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [memberName, setMemberName] = useState('');
-  const [members, setMembers] = useState<{ id: string; name: string }[]>([]);
+  const [members, setMembers] = useState<{ id: string; name: string; avatar?: string }[]>([]);
   
   const handleAddMember = () => {
     if (!memberName.trim()) return;
